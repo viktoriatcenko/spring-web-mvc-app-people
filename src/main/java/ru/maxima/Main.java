@@ -1,2 +1,4 @@
-package ru.maxima;public class Main {
+package ru.maxima;
+
+public class Main {
 }
