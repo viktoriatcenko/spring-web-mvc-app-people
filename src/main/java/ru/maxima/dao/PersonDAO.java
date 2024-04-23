@@ -71,11 +71,15 @@ public class PersonDAO {
     public Person findById(Long id) {
         Person person = new Person();
         try {
-            Statement statement = connection.createStatement();
+//            String SQLQuery = "select * " +
+//                    "from person where id = " + id;
+            PreparedStatement prepareStatement = connection.prepareStatement("select * from person where id = ?");
             // select * from person where id = 3
-            String SQLQuery = "select * " +
-                    "from person where id = " + id;
-            ResultSet resultSet = statement.executeQuery(SQLQuery);
+
+            prepareStatement.setLong(1, id);
+
+
+            ResultSet resultSet = prepareStatement.executeQuery();
 
             while (resultSet.next()) {
                 person.setId(resultSet.getLong("id"));
