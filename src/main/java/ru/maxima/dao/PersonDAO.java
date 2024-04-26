@@ -15,9 +15,10 @@ import java.util.stream.Collectors;
 @Component
 public class PersonDAO {
 
-    private final String URL = "jdbc:postgresql://localhost:5433/maxima";
+
     private final String USERNAME = "postgres";
     private final String PASSWORD = "postgres";
+    String URL = "jdbc:postgresql://localhost:5432/maxima";
 
     private Connection connection;
 
@@ -29,6 +30,7 @@ public class PersonDAO {
         }
 
         try {
+
             connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -102,14 +104,17 @@ public class PersonDAO {
         Long id = last.get();
 
         try {
-            Statement statement = connection.createStatement();
+            PreparedStatement prepareStatement
+                    = connection.prepareStatement("insert into person (id, name, email, age) values (?, ?, ?, ?)");
             // insert into person (id, name, email, age)
             //            values (1, 'Viktor', 'viktor@mail.ru', 33)
 
-            String SQLQuery = "insert into person (id, name, email, age) values (" + ++id +  ", '"
-                    + person.getName() + "', '" + person.getEmail() + "', " + person.getAge() + ") ";
+            prepareStatement.setLong(1, ++id);
+            prepareStatement.setString(2, person.getName());
+            prepareStatement.setString(3, person.getEmail());
+            prepareStatement.setInt(4, person.getAge());
 
-            statement.executeUpdate(SQLQuery);
+            prepareStatement.executeUpdate();
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -121,13 +126,17 @@ public class PersonDAO {
         // update person set name = '', age = 255, email = '' where id = 1;
 
         try {
-            Statement statement = connection.createStatement();
+            PreparedStatement prepareStatement
+                    = connection.prepareStatement("update person set name = ?, email = ?, age = ? where id = ?");
+            // insert into person (id, name, email, age)
+            //            values (1, 'Viktor', 'viktor@mail.ru', 33)
 
-            String SQLQuery = "update person set name = '" + personFromView.getName() + "' ," +
-                    "age = " + personFromView.getAge() + ",  email = '" + personFromView.getEmail() +
-                    "'  where id = " + id;
+            prepareStatement.setString(1, personFromView.getName());
+            prepareStatement.setString(2, personFromView.getEmail());
+            prepareStatement.setInt(3, personFromView.getAge());
+            prepareStatement.setLong(4, id);
 
-            statement.executeUpdate(SQLQuery);
+            prepareStatement.executeUpdate();
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -139,11 +148,9 @@ public class PersonDAO {
         // delete from person where id = 1;
 
         try {
-            Statement statement = connection.createStatement();
+            PreparedStatement prepareStatement =connection.prepareStatement("delete from person where id = ?");
 
-            String SQLQuery = "delete from person where id = " + id;
-
-            statement.executeUpdate(SQLQuery);
+            prepareStatement.setLong(1, id);
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
