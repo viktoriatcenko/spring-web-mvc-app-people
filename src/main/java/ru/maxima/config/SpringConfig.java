@@ -25,12 +25,12 @@ import javax.sql.DataSource;
 public class SpringConfig implements WebMvcConfigurer {
 
     private final ApplicationContext applicationContext;
-    private final Environment environment;
+    private final Environment env;
 
     @Autowired
     public SpringConfig(ApplicationContext applicationContext, Environment environment) {
         this.applicationContext = applicationContext;
-        this.environment = environment;
+        this.env = environment;
     }
 
     @Bean
@@ -58,18 +58,20 @@ public class SpringConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public DataSource datasource() {
-        DriverManagerDataSource driverManagerDataSource = new DriverManagerDataSource();
-        driverManagerDataSource.setDriverClassName(environment.getProperty("driver"));
-        driverManagerDataSource.setUrl(environment.getProperty("url"));
-        driverManagerDataSource.setUsername(environment.getProperty("username"));
-        driverManagerDataSource.setPassword(environment.getProperty("password"));
-
-        return driverManagerDataSource;
+    public DataSource dataSource() {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        String driver = env.getProperty("driver");
+        String password = env.getProperty("password");
+        String url = env.getProperty("url");
+        dataSource.setDriverClassName(driver);
+        dataSource.setUsername("postgres");
+        dataSource.setPassword(password);
+        dataSource.setUrl(url);
+        return dataSource;
     }
 
     @Bean
-    public JdbcTemplate jdbcTemplate() throws Exception {
-        return new JdbcTemplate(datasource());
+    public JdbcTemplate jdbcTemplate(DataSource dataSource) {
+        return new JdbcTemplate(dataSource);
     }
 }
