@@ -94,5 +94,16 @@ public class PeopleController {
         return "redirect:/people";
     }
 
+    @GetMapping("/makeAdmin")
+    public String getPageToMakeAdmin(Model model, @ModelAttribute("person") Person person) {
+        model.addAttribute("allPeople", personDAO.getAllPeople());
+        return "people/view-to-make-admin";
+    }
 
+    @PostMapping("/admin-add")
+    public String makeAdmin(@ModelAttribute("person") Person person) {
+        Person byId = personDAO.findById(person.getId());
+        System.out.println("This person is now admin " + byId.getName());
+        return "redirect:/people";
+    }
 }
