@@ -9,6 +9,10 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.orm.hibernate5.HibernateTransactionManager;
+import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -17,11 +21,14 @@ import org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring6.view.ThymeleafViewResolver;
 
 import javax.sql.DataSource;
+import java.util.Objects;
+import java.util.Properties;
 
 @Configuration
 @ComponentScan("ru.maxima")
-@PropertySource("classpath:database.properties")
+@PropertySource("classpath:hibernate.properties")
 @EnableWebMvc
+@EnableTransactionManagement
 public class SpringConfig implements WebMvcConfigurer {
 
     private final ApplicationContext applicationContext;
@@ -60,12 +67,12 @@ public class SpringConfig implements WebMvcConfigurer {
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        String driver = env.getProperty("driver");
-        String password = env.getProperty("password");
-        String username = env.getProperty("username");
-        String url = env.getProperty("url");
-        dataSource.setDriverClassName(driver);
-        dataSource.setUsername("postgres");
+        String driver = env.getProperty("hibernate.driver_class");
+        String password = env.getProperty("hibernate.connection.password");
+        String username = env.getProperty("hibernate.connection.username");
+        String url = env.getProperty("hibernate.connection.url");
+        dataSource.setDriverClassName(Objects.requireNonNull(driver));
+        dataSource.setUsername(username);
         dataSource.setPassword(password);
         dataSource.setUrl(url);
         return dataSource;
@@ -74,5 +81,28 @@ public class SpringConfig implements WebMvcConfigurer {
     @Bean
     public JdbcTemplate jdbcTemplate(DataSource dataSource) {
         return new JdbcTemplate(dataSource);
+    }
+
+    private Properties hibernateProperties() {
+        Properties properties = new Properties();
+        properties.put("hibernate.show_sql", env.getProperty("hibernate.show_sql"));
+
+        return properties;
+    }
+
+    @Bean
+    public LocalSessionFactoryBean sessionFactory() {
+        LocalSessionFactoryBean sessionFactoryBean = new LocalSessionFactoryBean();
+        sessionFactoryBean.setDataSource(dataSource());
+        sessionFactoryBean.setPackagesToScan("ru.maxima.models");
+        sessionFactoryBean.setHibernateProperties(hibernateProperties());
+        return sessionFactoryBean;
+    }
+
+    @Bean
+    public PlatformTransactionManager hibernateTransactionManager() {
+        HibernateTransactionManager platformTransactionManager = new HibernateTransactionManager();
+        platformTransactionManager.setSessionFactory(sessionFactory().getObject());
+        return platformTransactionManager;
     }
 }
