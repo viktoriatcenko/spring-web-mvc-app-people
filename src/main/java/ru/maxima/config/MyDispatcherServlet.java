@@ -10,7 +10,7 @@ public class MyDispatcherServlet extends AbstractAnnotationConfigDispatcherServl
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
-        return new Class[]{SpringConfig.class};
+        return new Class[]{ru.maxima.spring.config.SpringConfig.class};
     }
 
     @Override

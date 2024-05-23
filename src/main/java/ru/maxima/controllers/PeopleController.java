@@ -9,8 +9,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import ru.maxima.PeopleService;
 import ru.maxima.dao.PersonDAO;
 import ru.maxima.models.Person;
+import ru.maxima.repositories.PeopleRepository;
 
 import java.util.List;
 
@@ -25,17 +27,17 @@ public class PeopleController {
     // Delete - удалить - DELETE - request
 
 
-
-    private final PersonDAO personDAO;
+    private final PeopleService peopleService;
 
     @Autowired
-    public PeopleController(PersonDAO personDAO) {
-        this.personDAO = personDAO;
+    public PeopleController(PeopleService peopleService) {
+        this.peopleService = peopleService;
     }
+
 
     @GetMapping()
     public String showAllPeople(Model model) {
-        List<Person> allPeople = personDAO.getAllPeople();
+        List<Person> allPeople = peopleService.getAllPeople();
 
         model.addAttribute("allPeople", allPeople);
 
@@ -45,7 +47,7 @@ public class PeopleController {
 
     @GetMapping("/{id}")
     public String showPersonById(@PathVariable("id") Integer id, Model model) {
-        Person person = personDAO.findById(Long.valueOf(id));
+        Person person = peopleService.findById(Long.valueOf(id));
         model.addAttribute("personById", person);
         return "people/view-with-person-by-id";
     }
@@ -63,14 +65,14 @@ public class PeopleController {
             return "people/view-to-create-new-person";
         }
 
-        personDAO.save(person);
+        peopleService.save(person);
 
         return "redirect:/people";
     }
 
     @GetMapping("/{id}/edit")
     public String getPageToEditPerson(Model model, @PathVariable("id") Integer id) {
-        model.addAttribute("editedPerson", personDAO.findById(Long.valueOf(id)));
+//        model.addAttribute("editedPerson", personDAO.findById(Long.valueOf(id)));
         return "people/view-to-edit-person";
     }
 
@@ -82,28 +84,28 @@ public class PeopleController {
         if (bindingResult.hasErrors()) {
             return "people/view-to-edit-person";
         }
-        personDAO.update(person, id);
+        peopleService.update(person, id);
 
         return "redirect:/people";
     }
 
     @PostMapping("/{id}/delete")
     public String deletePerson(@PathVariable("id") Integer id) {
-        personDAO.delete(id);
+        peopleService.delete(id);
 
         return "redirect:/people";
     }
 
     @GetMapping("/makeAdmin")
     public String getPageToMakeAdmin(Model model, @ModelAttribute("person") Person person) {
-        model.addAttribute("allPeople", personDAO.getAllPeople());
+        model.addAttribute("allPeople", peopleService.getAllPeople());
         return "people/view-to-make-admin";
     }
 
     @PostMapping("/admin-add")
     public String makeAdmin(@ModelAttribute("person") Person person) {
-        Person byId = personDAO.findById(person.getId());
-        System.out.println("This person is now admin " + byId.getName());
+//        Person byId = peopleService.findById(person.getId());
+//        System.out.println("This person is now admin " + byId.getName());
         return "redirect:/people";
     }
 }
