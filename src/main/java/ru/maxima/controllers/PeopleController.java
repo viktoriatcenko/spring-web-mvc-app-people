@@ -5,14 +5,13 @@ package ru.maxima.controllers;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.maxima.PeopleService;
-import ru.maxima.dao.PersonDAO;
 import ru.maxima.models.Person;
-import ru.maxima.repositories.PeopleRepository;
 
 import java.util.List;
 
@@ -30,7 +29,7 @@ public class PeopleController {
     private final PeopleService peopleService;
 
     @Autowired
-    public PeopleController(PeopleService peopleService) {
+    public PeopleController(@Qualifier("peopleService") PeopleService peopleService) {
         this.peopleService = peopleService;
     }
 
@@ -72,7 +71,7 @@ public class PeopleController {
 
     @GetMapping("/{id}/edit")
     public String getPageToEditPerson(Model model, @PathVariable("id") Integer id) {
-//        model.addAttribute("editedPerson", personDAO.findById(Long.valueOf(id)));
+        model.addAttribute("editedPerson", peopleService.findById(Long.valueOf(id)));
         return "people/view-to-edit-person";
     }
 
@@ -104,8 +103,8 @@ public class PeopleController {
 
     @PostMapping("/admin-add")
     public String makeAdmin(@ModelAttribute("person") Person person) {
-//        Person byId = peopleService.findById(person.getId());
-//        System.out.println("This person is now admin " + byId.getName());
+        Person byId = peopleService.findById(person.getId());
+        System.out.println("This person is now admin " + byId.getName());
         return "redirect:/people";
     }
 }

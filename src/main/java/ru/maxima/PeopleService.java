@@ -24,6 +24,8 @@ public class PeopleService {
         List<Person> people = repository.findAll();
 
 
+        test();
+
         return people;
     }
 
@@ -35,16 +37,25 @@ public class PeopleService {
 
     @Transactional
     public void save(Person person) {
-
+        repository.save(person);
     }
 
     @Transactional
     public void update(Person person, Integer id) {
-
+        person.setId(Long.valueOf(id));
+        repository.save(person);
     }
 
     @Transactional
     public void delete(Integer id) {
+        repository.deleteById(Long.valueOf(id));
+    }
 
+    @Transactional
+    public void test() {
+
+        List<Person> v = repository.findPeopleByNameLike("V%");
+
+        System.out.println(v);
     }
 }
